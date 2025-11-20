@@ -1,0 +1,29 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: #0f1115;
+  font-family: "Noto Sans KR", sans-serif;
+  color: #f0f0f0;
+}
+
+canvas {
+  display: block;
+}
+
+input, button {
+  font-size: 16px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+}
+
+button {
+  background: #ff6fa1;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #ff82b0;
+}
