@@ -5,6 +5,14 @@ const statusEl = document.getElementById('status');
 const profileEl = document.getElementById('profile');
 const canvas = document.getElementById('avatar-canvas');
 const video = document.getElementById('webcam');
+const eventFeed = document.getElementById('event-feed');
+const affinityBar = document.getElementById('affinity-bar');
+const affinityValue = document.getElementById('affinity-value');
+const energyBar = document.getElementById('energy-bar');
+const energyValue = document.getElementById('energy-value');
+const vibeChips = document.getElementById('vibe-chips');
+const objectiveList = document.getElementById('objective-list');
+const stageLabel = document.getElementById('stage-label');
 
 let messages = [];
 let profile = {};
@@ -12,6 +20,20 @@ let avatarImageUrl = '/avatars/default.svg';
 let avatarTexture = null;
 let renderer = null;
 let expressionSource = null;
+
+const objectives = [
+  { id: 'intro', label: '서로 자기소개 주고받기', done: false },
+  { id: 'interest', label: '취향 2가지 공유하기', done: false },
+  { id: 'plan', label: '데이트 분위기 정하기', done: false }
+];
+
+const gameState = {
+  affinity: 32,
+  energy: 70,
+  stage: 1,
+  tags: ['부드러운 조명', '포토 리얼 텍스처', '가벼운 아이스브레이킹'],
+  events: ['게임을 시작했어요. 대화를 입력해보세요!']
+};
 
 init();
 
@@ -21,6 +43,7 @@ async function init() {
   expressionSource = await setupExpressionSource(video);
   startRenderLoop();
   appendBot('안녕하세요! 취향을 알려주시면 아바타 스타일을 맞춰볼게요.');
+  updateGameUI();
 }
 
 chatForm.addEventListener('submit', async (event) => {
@@ -62,6 +85,7 @@ async function sendToServer(text) {
     appendBot(data.reply);
     renderProfile(profile);
     await loadAvatarTexture(avatarImageUrl);
+    applyGameLoop(text, data.reply);
   } catch (error) {
     console.error(error);
     appendBot('서버 호출에 실패했어요. 잠시 후 다시 시도해 주세요.');
@@ -73,10 +97,13 @@ async function sendToServer(text) {
 function appendUser(text) {
   messages.push({ role: 'user', content: text });
   addBubble('user', text);
+  pushEvent('당신: ' + text);
+  applyGameLoop(text);
 }
 
 function appendBot(text) {
   addBubble('bot', text);
+  pushEvent('아바타: ' + text);
 }
 
 function addBubble(role, text) {
@@ -108,10 +135,87 @@ function setStatus(text) {
   statusEl.textContent = text;
 }
 
+function pushEvent(text) {
+  gameState.events.unshift(text);
+  gameState.events = gameState.events.slice(0, 4);
+  eventFeed.innerHTML = gameState.events.map((e) => `<div class="event-feed__item">${e}</div>`).join('');
+}
+
+function applyGameLoop(userText = '', botReply = '') {
+  const sentimentBoost = computeAffinityDelta(userText, botReply);
+  gameState.affinity = clamp(gameState.affinity + sentimentBoost, 0, 100);
+  gameState.energy = clamp(gameState.energy - Math.max(userText.length / 120, 0.3), 0, 100);
+  updateObjectives();
+  updateStage();
+  updateGameUI();
+}
+
+function computeAffinityDelta(userText, botReply) {
+  const positiveHints = ['좋아', '멋', '고마', '행복', '재밌', '흥미', '설레'];
+  const negativeHints = ['싫', '피곤', '바빠', '힘들'];
+  let delta = 1;
+
+  const normalized = (userText || '').toLowerCase();
+  positiveHints.forEach((hint) => {
+    if (normalized.includes(hint)) delta += 3;
+  });
+  negativeHints.forEach((hint) => {
+    if (normalized.includes(hint)) delta -= 2;
+  });
+
+  if ((botReply || '').length > 120) delta += 1;
+  if (userText.length > 80) delta += 1;
+  return delta;
+}
+
+function updateObjectives() {
+  objectives.forEach((obj) => {
+    if (obj.id === 'intro' && messages.some((m) => m.content?.length > 0)) obj.done = true;
+    if (obj.id === 'interest' && messages.filter((m) => m.role === 'user').length >= 3) obj.done = true;
+    if (obj.id === 'plan' && gameState.affinity >= 75) obj.done = true;
+  });
+}
+
+function updateStage() {
+  if (gameState.affinity >= 75) gameState.stage = 3;
+  else if (gameState.affinity >= 45) gameState.stage = 2;
+  else gameState.stage = 1;
+
+  stageLabel.textContent =
+    gameState.stage === 3
+      ? 'Stage 3 · 분위기 확정!'
+      : gameState.stage === 2
+      ? 'Stage 2 · 서로 알아가는 중'
+      : 'Stage 1 · 첫 대화';
+}
+
+function updateGameUI() {
+  affinityBar.style.width = `${gameState.affinity}%`;
+  affinityValue.textContent = `${Math.round(gameState.affinity)}%`;
+  energyBar.style.width = `${gameState.energy}%`;
+  energyValue.textContent = `${Math.round(gameState.energy)}%`;
+
+  vibeChips.innerHTML = '';
+  gameState.tags.forEach((tag) => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.textContent = tag;
+    vibeChips.appendChild(chip);
+  });
+
+  objectiveList.innerHTML = '';
+  objectives.forEach((obj) => {
+    const li = document.createElement('li');
+    li.className = `objective ${obj.done ? 'objective--done' : ''}`;
+    li.innerHTML = `<div class="objective__check">${obj.done ? '✓' : ''}</div><div>${obj.label}</div>`;
+    objectiveList.appendChild(li);
+  });
+}
+
 async function setupExpressionSource(videoEl) {
   try {
     await setupWebcam(videoEl);
-    const mediaPipeAvailable = Boolean(window.FaceLandmarker && window.FilesetResolver && window.VisionTaskRunner); // guarded
+    const mediaPipeAvailable = Boolean(window.FaceLandmarker && window.FilesetResolver && window.VisionTaskRunner);
     if (!mediaPipeAvailable) {
       console.info('MediaPipe Tasks not detected; using stub expression source.');
       return createStubExpressionSource();
@@ -300,7 +404,6 @@ function startRenderLoop() {
   requestAnimationFrame(frame);
 }
 
-// Optional: outline for plugging in MediaPipe FaceMesh later.
 async function createMediaPipeExpressionSource(videoEl) {
   const vision = await window.FilesetResolver.forVisionTasks(
     'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.10/wasm'
@@ -346,4 +449,8 @@ function readEyeOpen(result) {
   const rightBlink = blend.find((c) => c.categoryName === 'eyeBlinkRight');
   const blink = Math.max(leftBlink?.score || 0, rightBlink?.score || 0);
   return 1 - blink;
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }

@@ -11,16 +11,59 @@
       <header class="app__header">
         <div>
           <p class="eyebrow">Web-based AI Dating + VTuber Demo</p>
-          <h1>Avatar Chat Prototype</h1>
-          <p class="subhead">좌측에서 채팅, 우측에서 실시간 아바타를 확인하세요.</p>
+          <h1>Avatar Dating Story</h1>
+          <p class="subhead">
+            좌측 채팅으로 스토리를 진행하고, 우측에서 아바타 표정과 진행 현황을 확인하세요.
+          </p>
         </div>
         <div class="status" id="status">Ready</div>
       </header>
+
+      <section class="hud-grid" aria-label="game hud">
+        <div class="hud-card">
+          <div class="hud-card__header">
+            <span class="dot dot--pink"></span>
+            <span>데이트 진행도</span>
+          </div>
+          <div class="meter">
+            <div class="meter__label">Affinity</div>
+            <div class="meter__track">
+              <div id="affinity-bar" class="meter__fill" style="width: 32%"></div>
+            </div>
+            <div id="affinity-value" class="meter__value">32%</div>
+          </div>
+          <div class="meter meter--secondary">
+            <div class="meter__label">Energy</div>
+            <div class="meter__track">
+              <div id="energy-bar" class="meter__fill meter__fill--blue" style="width: 70%"></div>
+            </div>
+            <div id="energy-value" class="meter__value">70%</div>
+          </div>
+        </div>
+
+        <div class="hud-card">
+          <div class="hud-card__header">
+            <span class="dot dot--cyan"></span>
+            <span>분위기 & 버프</span>
+          </div>
+          <div class="chips" id="vibe-chips"></div>
+          <div class="hud-note" id="stage-label">Stage 1 · 첫 대화</div>
+        </div>
+
+        <div class="hud-card hud-card--wide">
+          <div class="hud-card__header">
+            <span class="dot dot--lime"></span>
+            <span>목표</span>
+          </div>
+          <ul class="objective-list" id="objective-list"></ul>
+        </div>
+      </section>
 
       <main class="app__body">
         <section class="panel chat-panel">
           <div class="panel__header">Chat</div>
           <div id="chat-log" class="chat-log"></div>
+          <div class="event-feed" id="event-feed" aria-live="polite"></div>
           <form id="chat-form" class="chat-form">
             <input id="chat-input" type="text" placeholder="메시지를 입력하세요" autocomplete="off" required />
             <button type="submit">Send</button>
