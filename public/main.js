@@ -401,10 +401,17 @@ async function loadAvatarTexture(url) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-  const image = await loadImage(url);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-
-  avatarTexture = texture;
+  try {
+    const image = await loadImage(url);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    avatarTexture = texture;
+  } catch (error) {
+    console.warn('Avatar image failed to load, reverting to default.', error);
+    pushEvent('시스템: 아바타 이미지를 불러오지 못해 기본 이미지로 복원합니다.');
+    if (url !== '/avatars/default.svg') {
+      await loadAvatarTexture('/avatars/default.svg');
+    }
+  }
 }
 
 function loadImage(url) {

@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const { OpenAI } = require('openai');
@@ -151,11 +152,21 @@ async function generateAvatarImage(imagePrompt) {
   const imageResponse = await openai.images.generate({
     model: imageModel,
     prompt: imagePrompt,
-    size: '1024x1024'
+    size: '1024x1024',
+    response_format: 'b64_json'
   });
 
-  const generatedUrl = imageResponse.data?.[0]?.url;
-  return generatedUrl || '/avatars/default.svg';
+  const b64 = imageResponse.data?.[0]?.b64_json;
+  if (!b64) return '/avatars/default.svg';
+
+  const buffer = Buffer.from(b64, 'base64');
+  const fileName = `avatar-${Date.now()}.png`;
+  const avatarsDir = path.join(__dirname, 'public', 'avatars');
+  await fs.promises.mkdir(avatarsDir, { recursive: true });
+  const filePath = path.join(avatarsDir, fileName);
+  await fs.promises.writeFile(filePath, buffer);
+
+  return `/avatars/${fileName}`;
 }
 
 function buildStubDesign(profile, fallbackReason = '') {
