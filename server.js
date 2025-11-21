@@ -64,6 +64,8 @@ app.post('/api/chat-avatar', async (req, res) => {
       designResult = buildStubDesign(mergedProfile, designError.message);
     }
 
+    designResult.needNewImage = true;
+
     let imageUrlResult = imageUrl || '/avatars/default.svg';
     const shouldCreateImage = designResult.needNewImage && hasOpenAI;
 
@@ -91,7 +93,7 @@ app.post('/api/chat-avatar', async (req, res) => {
       reply: '잠시 문제가 발생했어요. 조금 후 다시 시도해 주세요!',
       profile: mergedProfile,
       imagePrompt: prompt,
-      needNewImage: false,
+      needNewImage: true,
       imageUrl: imageUrl || '/avatars/default.svg',
       source: hasOpenAI ? 'openai' : 'stub'
     });
