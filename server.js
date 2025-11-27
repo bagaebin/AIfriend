@@ -66,15 +66,32 @@ app.post('/api/chat-avatar', async (req, res) => {
     }
 
     const needNewImage = designResult.needNewImage && hasMeaningfulPromptChange(lastImagePrompt, designResult.imagePrompt);
+    const forceFirstImage = !imageUrl;
+    const shouldGenerateImage = hasOpenAI && (forceFirstImage || needNewImage);
+
+    let nextImageUrl = imageUrl;
+    let meta = designResult.meta || null;
+
+    if (shouldGenerateImage) {
+      try {
+        nextImageUrl = await generateAvatarImage(designResult.imagePrompt);
+      } catch (imageError) {
+        console.error('Image generation failed; keeping previous image.', imageError);
+        meta = {
+          ...(meta || {}),
+          imageError: imageError.message || 'image generation failed'
+        };
+      }
+    }
 
     res.json({
       reply: designResult.reply,
       profile: designResult.profile,
       imagePrompt: designResult.imagePrompt,
-      needNewImage,
-      imageUrl,
+      needNewImage: shouldGenerateImage ? false : needNewImage,
+      imageUrl: nextImageUrl,
       source: designResult.source || (hasOpenAI ? 'openai' : 'stub'),
-      meta: designResult.meta || null
+      meta
     });
   } catch (error) {
     console.error('Error in /api/chat-avatar', error);
