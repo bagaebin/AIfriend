@@ -149,25 +149,63 @@ async function fetchDesignFromOpenAI(prompt, messages) {
 }
 
 async function generateAvatarImage(imagePrompt) {
-  const imageResponse = await openai.images.generate({
-    model: imageModel,
-    prompt: imagePrompt,
-    size: '1024x1024',
-    response_format: 'b64_json'
-  });
+  console.log('[avatar] requesting image with model:', imageModel);
 
-  const b64 = imageResponse.data?.[0]?.b64_json;
-  if (!b64) return '/avatars/default.svg';
+  try {
+    const imageResponse = await openai.images.generate({
+      model: imageModel,              // 예: 'gpt-image-1'
+      prompt: imagePrompt,
+      size: '1024x1024',
+      // 2711 error 해결
+      // response_format: 'b64_json',
+    });
 
-  const buffer = Buffer.from(b64, 'base64');
-  const fileName = `avatar-${Date.now()}.png`;
-  const avatarsDir = path.join(__dirname, 'public', 'avatars');
-  await fs.promises.mkdir(avatarsDir, { recursive: true });
-  const filePath = path.join(avatarsDir, fileName);
-  await fs.promises.writeFile(filePath, buffer);
+    const data0 = imageResponse.data?.[0];
+    const b64 = data0?.b64_json;
 
-  return `/avatars/${fileName}`;
+    if (!b64) {
+      console.error('[avatar] No b64_json in imageResponse:', JSON.stringify(imageResponse, null, 2));
+      return '/avatars/default.svg';
+    }
+
+    const buffer = Buffer.from(b64, 'base64');
+    const fileName = `avatar-${Date.now()}.png`;
+    const avatarsDir = path.join(__dirname, 'public', 'avatars');
+
+    await fs.promises.mkdir(avatarsDir, { recursive: true });
+    const filePath = path.join(avatarsDir, fileName);
+    await fs.promises.writeFile(filePath, buffer);
+
+    console.log('[avatar] wrote file:', filePath);
+    return `/avatars/${fileName}`;
+  } catch (err) {
+    console.error('[avatar] OpenAI image error:', err);
+    // 에러는 위 라우트에서 다시 catch해서 default.svg로 되돌릴 거라 throw 유지
+    throw err;
+  }
 }
+
+// 2711
+// async function generateAvatarImage(imagePrompt) {
+//   const imageResponse = await openai.images.generate({
+//     model: imageModel,
+//     prompt: imagePrompt,
+//     size: '1024x1024',
+//     response_format: 'b64_json'
+//   });
+
+//   const b64 = imageResponse.data?.[0]?.b64_json;
+//   if (!b64) return '/avatars/default.svg';
+
+//   const buffer = Buffer.from(b64, 'base64');
+//   const fileName = `avatar-${Date.now()}.png`;
+//   const avatarsDir = path.join(__dirname, 'public', 'avatars');
+//   await fs.promises.mkdir(avatarsDir, { recursive: true });
+//   const filePath = path.join(avatarsDir, fileName);
+//   await fs.promises.writeFile(filePath, buffer);
+
+//   return `/avatars/${fileName}`;
+// }
 
 function buildStubDesign(profile, fallbackReason = '') {
   const reply = '프로필을 바탕으로 아바타 느낌을 정리했어요. 더 궁금한 점이 있으면 알려줘!';

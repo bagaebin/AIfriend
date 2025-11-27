@@ -394,6 +394,8 @@ async function loadAvatarTexture(url) {
   if (!renderer || !renderer.gl) return;
   const gl = renderer.gl;
 
+  console.log('[avatar] loading texture from', url);
+
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -404,6 +406,7 @@ async function loadAvatarTexture(url) {
   try {
     const image = await loadImage(url);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    console.log('[avatar] texture upload OK for', url);
     avatarTexture = texture;
   } catch (error) {
     console.warn('Avatar image failed to load, reverting to default.', error);
@@ -417,9 +420,14 @@ async function loadAvatarTexture(url) {
 function loadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = reject;
+    img.onload = () => {
+      console.log('[avatar] image loaded in DOM', url);
+      resolve(img);
+    };
+    img.onerror = (err) => {
+      console.warn('[avatar] image load error for', url, err);
+      reject(err);
+    };
     img.src = url;
   });
 }
