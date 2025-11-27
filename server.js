@@ -102,8 +102,8 @@ app.post('/api/chat-avatar', async (req, res) => {
 });
 
 function buildPrompt(profile) {
-  return `You are meeting someone for the first time on a call. Speak only in Korean, in a natural and warm dating tone, and never mention image generation, prompts, or avatars. Your only output must be valid JSON in this exact shape:\n\n{
-  "reply": "...natural Korean chat reply...",
+  return `You are meeting someone for the first time on a call. Speak only in English, in a natural and warm dating tone, and never mention image generation, prompts, or avatars. Your only output must be valid JSON in this exact shape:\n\n{
+  "reply": "...natural English chat reply...",
   "profile": {
     "nickname": "...",
     "personalityVibe": "...",

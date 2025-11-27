@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,7 +10,7 @@
     <div class="app">
       <header class="topbar">
         <div class="logo" aria-label="dnilb logo">dnilb</div>
-        <button id="help-button" class="ghost-button" type="button">help</button>
+        <button id="help-button" class="ghost-button" type="button">Help</button>
       </header>
 
       <main class="layout" aria-label="chat and call layout">
@@ -23,7 +23,7 @@
             <input
               id="chat-input"
               type="text"
-              placeholder="메시지를 입력하세요"
+              placeholder="Type your message"
               autocomplete="off"
               required
               aria-label="chat input"
@@ -34,8 +34,8 @@
 
         <section class="call-shell" aria-label="call preview">
           <div class="portrait" role="img" aria-label="generated portrait">
-            <img id="portrait-image" src="/avatars/default.svg" alt="사용자 초상" />
-            <span class="chip chip--tag">you</span>
+            <img id="portrait-image" src="/avatars/default.svg" alt="User portrait" />
+            <span class="chip chip--tag">You</span>
           </div>
 
           <div class="call-controls">
@@ -43,24 +43,22 @@
               <div class="bot-avatar" aria-hidden="true"></div>
               <div class="bot-label">Bot</div>
             </div>
-            <button id="call-reset" type="button" class="secondary-button">Call to another</button>
+            <button id="call-reset" type="button" class="secondary-button">Call another</button>
           </div>
         </section>
       </main>
     </div>
 
-    <div id="help-modal" class="modal" aria-hidden="true" role="dialog" aria-label="작품 의도">
+    <div id="help-modal" class="modal" aria-hidden="true" role="dialog" aria-label="About this work">
       <div class="modal__backdrop"></div>
       <div class="modal__dialog">
         <div class="modal__header">
-          <h3>작품 의도</h3>
+          <h3>About this work</h3>
           <button id="help-close" class="ghost-button" type="button" aria-label="close help">✕</button>
         </div>
         <div class="modal__body">
           <p>
-            이 인터페이스는 처음 만난 상대와 자연스럽게 대화하며, 대화 맥락을 바탕으로 비가시적인 이미지 프롬프트를 업데이트해
-            아바타의 분위기를 잔잔히 변화시키는 실험적 콜 뷰입니다. 텍스트로는 이미지 생성에 대해 언급하지 않고, 실제 화상통화
-            같은 친숙함에 집중합니다.
+            This interface is an experimental call view designed to let you chat naturally with someone you've just met. The avatar's mood gently changes based on the conversation context, updating invisible image prompts in the background. The text does not mention image generation, focusing instead on the familiar feeling of a real video call.
           </p>
         </div>
       </div>

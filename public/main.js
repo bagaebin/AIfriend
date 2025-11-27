@@ -15,7 +15,7 @@ init();
 
 function init() {
   setPortrait(avatarImageUrl);
-  appendBot('안녕! 이렇게 연결되니까 정말 새롭다. 어떤 하루를 보내고 있어?');
+  appendBot('Hello');
   chatForm.addEventListener('submit', handleSubmit);
   callResetButton.addEventListener('click', resetSession);
   helpButton.addEventListener('click', openHelp);
@@ -87,13 +87,14 @@ function setPortrait(url) {
   portraitImage.src = url;
 }
 
+// [Note] 초기 인사 여러 개 지정해 새로운 사람과 대화하는 것처럼 느껴질 것.
 function resetSession() {
   messages = [];
   profile = {};
   avatarImageUrl = '/avatars/default.svg';
   chatLog.innerHTML = '';
   setPortrait(avatarImageUrl);
-  appendBot('새 통화로 전환했어. 어떻게 불러주면 좋을까?');
+  appendBot('Hi');
   chatInput.focus();
 }
 
