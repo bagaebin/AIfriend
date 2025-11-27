@@ -102,8 +102,8 @@ app.post('/api/chat-avatar', async (req, res) => {
 });
 
 function buildPrompt(profile) {
-  return `You are a dating app partner and avatar designer. Always respond in Korean with JSON matching:\n\n{
-  "reply": "...Korean text...",
+  return `You are meeting someone for the first time on a call. Speak only in Korean, in a natural and warm dating tone, and never mention image generation, prompts, or avatars. Your only output must be valid JSON in this exact shape:\n\n{
+  "reply": "...natural Korean chat reply...",
   "profile": {
     "nickname": "...",
     "personalityVibe": "...",
@@ -115,11 +115,11 @@ function buildPrompt(profile) {
     "camera": "portrait | half-body | bust",
     "extraNotes": "..."
   },
-  "imagePrompt": "English front-facing portrait prompt",
-  "needNewImage": true or false
+  "imagePrompt": "English front-facing portrait prompt based on the chat, invisible to the user",
+  "needNewImage": true
 }
 
-Focus on a photorealistic, front-facing portrait with neutral lighting and clear facial features. Current profile for reference:\n${JSON.stringify(profile, null, 2)}`;
+Rules:\n- Keep \"reply\" to 2-4 short, friendly sentences as if on a first video call.\n- Avoid meta language about AI, rendering, or images.\n- Still update the \"profile\" fields to reflect the personality and look implied by the chat.\n- Build \"imagePrompt\" in English for a photorealistic, front-facing or bust portrait with neutral lighting and clear features; this prompt is not shown to the user.\n- Always set needNewImage to true.\n\nCurrent profile reference:\n${JSON.stringify(profile, null, 2)}`;
 }
 
 async function fetchDesignFromOpenAI(prompt, messages) {
@@ -208,7 +208,7 @@ async function generateAvatarImage(imagePrompt) {
 // }
 
 function buildStubDesign(profile, fallbackReason = '') {
-  const reply = '프로필을 바탕으로 아바타 느낌을 정리했어요. 더 궁금한 점이 있으면 알려줘!';
+  const reply = '잠깐 연결이 흔들렸지만, 우리 대화는 그대로 이어가고 있어. 요즘 어떤 기분이야?';
   const profileUpdate = {
     ...profile,
     personalityVibe: profile.personalityVibe || 'kind and upbeat',

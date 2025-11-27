@@ -3,89 +3,69 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Dating Avatar & VTuber Prototype</title>
+    <title>dnilb · AI Chat Call</title>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <div class="app">
-      <header class="app__header">
-        <div>
-          <p class="eyebrow">Web-based AI Dating + VTuber Demo</p>
-          <h1>Avatar Dating Story</h1>
-          <p class="subhead">
-            좌측 채팅으로 스토리를 진행하고, 우측에서 아바타 표정과 진행 현황을 확인하세요.
-          </p>
-        </div>
-        <div class="status" id="status">Ready</div>
+      <header class="topbar">
+        <div class="logo" aria-label="dnilb logo">dnilb</div>
+        <button id="help-button" class="ghost-button" type="button">help</button>
       </header>
 
-      <section class="hud-grid" aria-label="game hud">
-        <div class="hud-card">
-          <div class="hud-card__header">
-            <span class="dot dot--pink"></span>
-            <span>데이트 진행도</span>
+      <main class="layout" aria-label="chat and call layout">
+        <section class="chat-shell" aria-label="chat with AI">
+          <div class="chat-panel">
+            <h2>Chat</h2>
+            <div id="chat-log" class="chat-log" aria-live="polite"></div>
           </div>
-          <div class="meter">
-            <div class="meter__label">Affinity</div>
-            <div class="meter__track">
-              <div id="affinity-bar" class="meter__fill" style="width: 32%"></div>
-            </div>
-            <div id="affinity-value" class="meter__value">32%</div>
-          </div>
-          <div class="meter meter--secondary">
-            <div class="meter__label">Energy</div>
-            <div class="meter__track">
-              <div id="energy-bar" class="meter__fill meter__fill--blue" style="width: 70%"></div>
-            </div>
-            <div id="energy-value" class="meter__value">70%</div>
-          </div>
-        </div>
-
-        <div class="hud-card">
-          <div class="hud-card__header">
-            <span class="dot dot--cyan"></span>
-            <span>분위기 & 버프</span>
-          </div>
-          <div class="chips" id="vibe-chips"></div>
-          <div class="hud-note" id="stage-label">Stage 1 · 첫 대화</div>
-        </div>
-
-        <div class="hud-card hud-card--wide">
-          <div class="hud-card__header">
-            <span class="dot dot--lime"></span>
-            <span>목표</span>
-          </div>
-          <ul class="objective-list" id="objective-list"></ul>
-        </div>
-      </section>
-
-      <main class="app__body">
-        <section class="panel chat-panel">
-          <div class="panel__header">Chat</div>
-          <div id="chat-log" class="chat-log"></div>
-          <div class="event-feed" id="event-feed" aria-live="polite"></div>
           <form id="chat-form" class="chat-form">
-            <input id="chat-input" type="text" placeholder="메시지를 입력하세요" autocomplete="off" required />
-            <button type="submit">Send</button>
+            <input
+              id="chat-input"
+              type="text"
+              placeholder="메시지를 입력하세요"
+              autocomplete="off"
+              required
+              aria-label="chat input"
+            />
+            <button type="submit" class="primary-button">Send</button>
           </form>
         </section>
 
-        <section class="panel avatar-panel">
-          <div class="panel__header">Avatar</div>
-          <div class="avatar-stage">
-            <canvas id="avatar-canvas" width="640" height="640"></canvas>
-            <video id="webcam" autoplay playsinline muted hidden></video>
+        <section class="call-shell" aria-label="call preview">
+          <div class="portrait" role="img" aria-label="generated portrait">
+            <img id="portrait-image" src="/avatars/default.svg" alt="사용자 초상" />
+            <span class="chip chip--tag">you</span>
           </div>
-          <div class="legend">
-            <p>표정 추적은 MediaPipe FaceMesh를 사용합니다 (이 데모는 간단히 스텁 처리됨).</p>
-            <p class="legend__note">아바타 이미지는 OpenAI 이미지 API 결과 또는 기본 텍스처를 사용합니다.</p>
+
+          <div class="call-controls">
+            <div class="bot-preview" aria-label="bot call tile">
+              <div class="bot-avatar" aria-hidden="true"></div>
+              <div class="bot-label">Bot</div>
+            </div>
+            <button id="call-reset" type="button" class="secondary-button">Call to another</button>
           </div>
-          <div class="profile" id="profile"></div>
         </section>
       </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.10"></script>
+    <div id="help-modal" class="modal" aria-hidden="true" role="dialog" aria-label="작품 의도">
+      <div class="modal__backdrop"></div>
+      <div class="modal__dialog">
+        <div class="modal__header">
+          <h3>작품 의도</h3>
+          <button id="help-close" class="ghost-button" type="button" aria-label="close help">✕</button>
+        </div>
+        <div class="modal__body">
+          <p>
+            이 인터페이스는 처음 만난 상대와 자연스럽게 대화하며, 대화 맥락을 바탕으로 비가시적인 이미지 프롬프트를 업데이트해
+            아바타의 분위기를 잔잔히 변화시키는 실험적 콜 뷰입니다. 텍스트로는 이미지 생성에 대해 언급하지 않고, 실제 화상통화
+            같은 친숙함에 집중합니다.
+          </p>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="/main.js"></script>
   </body>
 </html>
