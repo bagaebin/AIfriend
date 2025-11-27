@@ -65,11 +65,11 @@ async function sendToServer(text) {
 
     appendBot(data.reply);
 
-    if (data.needNewImage && lastImagePrompt) {
-      requestAvatarImage(lastImagePrompt);
-    } else {
-      setPortrait(avatarImageUrl);
-    }
+    // 서버가 needNewImage 플래그를 보고 실제로 이미지를 생성했는지 여부와 상관없이
+    // 항상 서버에서 넘어온 imageUrl을 그대로 초상화로 반영한다.
+    // 서버 쪽에서 needNewImage === false 인 경우에는 이전 imageUrl을 그대로 돌려주기 때문에
+    // 매 입력마다 새 이미지를 만들지 않고, 필요한 순간에만 생성된다.
+    setPortrait(avatarImageUrl);
   } catch (error) {
     console.error(error);
     appendBot("Looks like the connection glitched. Let's try again in a moment.");
@@ -120,37 +120,6 @@ function resetSession() {
   setPortrait(avatarImageUrl);
   appendBot("Hey, I'm here whenever you want to dive in again.");
   chatInput.focus();
-}
-
-async function requestAvatarImage(imagePrompt) {
-  const requestId = ++latestImageRequestId;
-  avatarImageUrl = null;
-  setPortrait(null);
-
-  try {
-    const response = await fetch('/api/generate-avatar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: imagePrompt })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Image request failed: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (requestId !== latestImageRequestId) return;
-
-    avatarImageUrl = data.imageUrl || null;
-    setPortrait(avatarImageUrl);
-  } catch (error) {
-    console.error(error);
-    if (requestId === latestImageRequestId) {
-      avatarImageUrl = null;
-      setPortrait(null);
-    }
-  }
 }
 
 function openHelp() {
