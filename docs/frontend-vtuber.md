@@ -12,6 +12,7 @@
 - **Chat Module**
   - `chat-log`에 말풍선을 추가하고, `chat-form` 제출 시 서버에 메시지와 현재 프로필을 전달.
   - `Call to another` 클릭 시 메시지, 프로필, 초상 이미지를 초기화하고 새 인사 메시지를 표시.
+  - 대기 중에는 말풍선에 `...` 로딩 인디케이터를 표시하고, 응답은 항상 영어로 전달한다.
 - **Portrait Display**
   - 서버가 반환한 `imagePrompt`를 바탕으로 `/api/generate-avatar`에 별도 요청해 최신 이미지가 준비되면 `<img id="portrait-image">`에 반영한다.
   - 이미지가 없거나 생성 중일 땐 어두운 배경 위에 `bot-avatar` + `bot-label`로 구성된 프리뷰 타일을 보여준다.

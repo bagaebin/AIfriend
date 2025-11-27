@@ -18,7 +18,7 @@ init();
 
 function init() {
   setPortrait(avatarImageUrl);
-  appendBot('Hello');
+  appendBot("Hey there—I'm already on the line with you. What's on your mind?");
   chatForm.addEventListener('submit', handleSubmit);
   callResetButton.addEventListener('click', resetSession);
   helpButton.addEventListener('click', openHelp);
@@ -39,6 +39,7 @@ async function handleSubmit(event) {
 }
 
 async function sendToServer(text) {
+  const removeTyping = showBotTyping();
   const payload = {
     messages: [...messages, { role: 'user', content: text }],
     currentProfile: profile,
@@ -71,7 +72,9 @@ async function sendToServer(text) {
     }
   } catch (error) {
     console.error(error);
-    appendBot('지금은 연결이 불안정한가 봐. 잠시 뒤에 다시 이야기해 볼까?');
+    appendBot("Looks like the connection glitched. Let's try again in a moment.");
+  } finally {
+    removeTyping();
   }
 }
 
@@ -115,7 +118,7 @@ function resetSession() {
   latestImageRequestId = 0;
   chatLog.innerHTML = '';
   setPortrait(avatarImageUrl);
-  appendBot('Hi');
+  appendBot("Hey, I'm here whenever you want to dive in again.");
   chatInput.focus();
 }
 
@@ -158,4 +161,23 @@ function openHelp() {
 function closeHelp() {
   helpModal.classList.remove('open');
   helpModal.setAttribute('aria-hidden', 'true');
+}
+
+function showBotTyping() {
+  const div = document.createElement('div');
+  div.className = 'bubble bot typing';
+
+  const dots = document.createElement('div');
+  dots.className = 'typing-dots';
+  dots.innerHTML = '<span></span><span></span><span></span>';
+
+  div.appendChild(dots);
+  chatLog.appendChild(div);
+  chatLog.scrollTop = chatLog.scrollHeight;
+
+  return () => {
+    if (div.parentNode) {
+      div.parentNode.removeChild(div);
+    }
+  };
 }

@@ -79,7 +79,7 @@ app.post('/api/chat-avatar', async (req, res) => {
   } catch (error) {
     console.error('Error in /api/chat-avatar', error);
     res.status(500).json({
-      reply: '잠시 문제가 발생했어요. 조금 후 다시 시도해 주세요!',
+      reply: 'Something went wrong, but I am still here. Can we try that again in a moment?',
       profile: mergedProfile,
       imagePrompt: prompt,
       needNewImage: false,
@@ -110,7 +110,7 @@ app.post('/api/generate-avatar', async (req, res) => {
 });
 
 function buildPrompt(profile, lastImagePrompt = '') {
-  return `You are meeting someone for the first time on a call. Speak only in English, in a natural and warm dating tone, and never mention image generation, prompts, or avatars. Your only output must be valid JSON in this exact shape:\n\n{
+  return `You are already on a call and greeted the other person once. Continue the conversation naturally without repeating introductions, even if they greet again. Speak only in English, in a natural and warm dating tone, and never mention image generation, prompts, or avatars. Your only output must be valid JSON in this exact shape:\n\n{
   "reply": "...natural English chat reply...",
   "profile": {
     "nickname": "...",
@@ -127,7 +127,7 @@ function buildPrompt(profile, lastImagePrompt = '') {
   "needNewImage": true | false
 }
 
-Rules:\n- Keep \"reply\" to 2-4 short, friendly sentences as if on a first video call.\n- Avoid meta language about AI, rendering, or images.\n- Still update the \"profile\" fields to reflect the personality and look implied by the chat.\n- Build \"imagePrompt\" in English for a photorealistic, front-facing or bust portrait with neutral lighting and clear features; this prompt is not shown to the user.\n- Set needNewImage to true only when the appearance meaningfully changes enough to warrant a fresh portrait.\n- If the new imagePrompt is essentially the same as the previous one, set needNewImage to false.\n\nPrevious image prompt for reference (may be empty):\n${lastImagePrompt}\n\nCurrent profile reference:\n${JSON.stringify(profile, null, 2)}`;
+Rules:\n- Keep \"reply\" to 2-4 short, friendly sentences as if on a relaxed video call.\n- Avoid meta language about AI, rendering, or images.\n- Do not greet like it's the first meeting again; pick up the thread naturally even if the user just said hi.\n- Still update the \"profile\" fields to reflect the personality and look implied by the chat.\n- Build \"imagePrompt\" in English for a photorealistic, front-facing or bust portrait with neutral lighting and clear features; this prompt is not shown to the user.\n- Set needNewImage to true only when the appearance meaningfully changes enough to warrant a fresh portrait.\n- If the new imagePrompt is essentially the same as the previous one, set needNewImage to false.\n\nPrevious image prompt for reference (may be empty):\n${lastImagePrompt}\n\nCurrent profile reference:\n${JSON.stringify(profile, null, 2)}`;
 }
 
 function hasMeaningfulPromptChange(previousPrompt = '', nextPrompt = '') {
@@ -226,7 +226,7 @@ async function generateAvatarImage(imagePrompt) {
 // }
 
 function buildStubDesign(profile, fallbackReason = '') {
-  const reply = '잠깐 연결이 흔들렸지만, 우리 대화는 그대로 이어가고 있어. 요즘 어떤 기분이야?';
+  const reply = "I lost the connection for a moment, but let's keep chatting. How are you feeling right now?";
   const profileUpdate = {
     ...profile,
     personalityVibe: profile.personalityVibe || 'kind and upbeat',
