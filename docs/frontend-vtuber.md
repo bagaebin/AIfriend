@@ -12,17 +12,19 @@
 - **Chat Module**
   - `chat-log`에 말풍선을 추가하고, `chat-form` 제출 시 서버에 메시지와 현재 프로필을 전달.
   - `Call to another` 클릭 시 메시지, 프로필, 초상 이미지를 초기화하고 새 인사 메시지를 표시.
+  - 대기 중에는 말풍선에 `...` 로딩 인디케이터를 표시하고, 응답은 항상 영어로 전달한다.
 - **Portrait Display**
-  - 서버가 반환한 `imageUrl`을 `<img id="portrait-image">`에 반영해 상단 콜 뷰에 노출.
-  - 카메라/웹캠 의존성 없이 정적 이미지로 표기해 로딩 속도와 단순성을 확보.
+  - 서버가 반환한 `imagePrompt`를 바탕으로 `/api/generate-avatar`에 별도 요청해 최신 이미지가 준비되면 `<img id="portrait-image">`에 반영한다.
+  - 이미지가 없거나 생성 중일 땐 어두운 배경 위에 `bot-avatar` + `bot-label`로 구성된 프리뷰 타일을 보여준다.
 - **Help Modal**
   - `help` 버튼으로 작품 의도 안내를 띄우고, 배경 클릭 또는 닫기 버튼으로 숨김.
 
 ## 인터랙션 루프 요약
-1. 사용자가 메시지를 입력하고 제출하면 `messages`, `currentProfile`, `imageUrl`을 `/api/chat-avatar`로 전송한다.
-2. 서버는 JSON 형태의 대화 답변과 `imageUrl`을 돌려주고, 프론트는 채팅 버블과 초상 이미지를 갱신한다.
-3. `Call to another` 버튼으로 세션을 초기화해 새로운 대화를 시작할 수 있다.
+1. 사용자가 메시지를 입력하고 제출하면 `messages`, `currentProfile`, `imageUrl`, `lastImagePrompt`를 `/api/chat-avatar`로 전송한다.
+2. 서버는 JSON 형태의 대화 답변과 `imagePrompt`, `needNewImage`를 돌려주며, 프론트는 즉시 채팅 버블을 그린 뒤 필요할 때만 `/api/generate-avatar`로 이미지를 생성한다.
+3. 이미지 생성 응답은 가장 마지막으로 요청된 프롬프트에 대해서만 반영해 최신 초상만 유지한다.
+4. `Call to another` 버튼으로 세션을 초기화해 새로운 대화를 시작할 수 있다.
 
 ## 리소스 및 장애 대응
-- 이미지 로드 실패 시 기본 초상(`/avatars/default.svg`)으로 롤백하고, 채팅에 친절한 안내를 보낸다.
+- 이미지가 없거나 생성에 실패하면 기본 초상 대신 어두운 배경의 프리뷰 타일을 노출해 끊김 없이 대화를 이어간다.
 - 브라우저 의존 리소스를 최소화했으므로 네트워크 오류만 감지하면 되며, 헬프 모달은 오프라인에서도 동작한다.

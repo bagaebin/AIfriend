@@ -1,6 +1,7 @@
 const chatLog = document.getElementById('chat-log');
 const chatForm = document.getElementById('chat-form');
 const chatInput = document.getElementById('chat-input');
+const portrait = document.getElementById('portrait');
 const portraitImage = document.getElementById('portrait-image');
 const callResetButton = document.getElementById('call-reset');
 const helpButton = document.getElementById('help-button');
@@ -9,13 +10,15 @@ const helpModal = document.getElementById('help-modal');
 
 let messages = [];
 let profile = {};
-let avatarImageUrl = '/avatars/default.svg';
+let avatarImageUrl = null;
+let lastImagePrompt = '';
+let latestImageRequestId = 0;
 
 init();
 
 function init() {
   setPortrait(avatarImageUrl);
-  appendBot('Hello');
+  appendBot("Hey there—I'm already on the line with you. What's on your mind?");
   chatForm.addEventListener('submit', handleSubmit);
   callResetButton.addEventListener('click', resetSession);
   helpButton.addEventListener('click', openHelp);
@@ -36,10 +39,12 @@ async function handleSubmit(event) {
 }
 
 async function sendToServer(text) {
+  const removeTyping = showBotTyping();
   const payload = {
     messages: [...messages, { role: 'user', content: text }],
     currentProfile: profile,
-    imageUrl: avatarImageUrl
+    imageUrl: avatarImageUrl,
+    lastImagePrompt
   };
 
   try {
@@ -56,12 +61,20 @@ async function sendToServer(text) {
     const data = await response.json();
     profile = data.profile || profile;
     avatarImageUrl = data.imageUrl || avatarImageUrl;
+    lastImagePrompt = data.imagePrompt || lastImagePrompt;
 
     appendBot(data.reply);
+
+    // 서버가 needNewImage 플래그를 보고 실제로 이미지를 생성했는지 여부와 상관없이
+    // 항상 서버에서 넘어온 imageUrl을 그대로 초상화로 반영한다.
+    // 서버 쪽에서 needNewImage === false 인 경우에는 이전 imageUrl을 그대로 돌려주기 때문에
+    // 매 입력마다 새 이미지를 만들지 않고, 필요한 순간에만 생성된다.
     setPortrait(avatarImageUrl);
   } catch (error) {
     console.error(error);
-    appendBot('지금은 연결이 불안정한가 봐. 잠시 뒤에 다시 이야기해 볼까?');
+    appendBot("Looks like the connection glitched. Let's try again in a moment.");
+  } finally {
+    removeTyping();
   }
 }
 
@@ -84,17 +97,28 @@ function addBubble(role, text) {
 }
 
 function setPortrait(url) {
-  portraitImage.src = url;
+  const hasImage = Boolean(url);
+  portrait.classList.toggle('has-image', hasImage);
+
+  if (hasImage) {
+    portraitImage.src = url;
+    portraitImage.removeAttribute('hidden');
+  } else {
+    portraitImage.setAttribute('hidden', 'hidden');
+    portraitImage.removeAttribute('src');
+  }
 }
 
 // [Note] 초기 인사 여러 개 지정해 새로운 사람과 대화하는 것처럼 느껴질 것.
 function resetSession() {
   messages = [];
   profile = {};
-  avatarImageUrl = '/avatars/default.svg';
+  avatarImageUrl = null;
+  lastImagePrompt = '';
+  latestImageRequestId = 0;
   chatLog.innerHTML = '';
   setPortrait(avatarImageUrl);
-  appendBot('Hi');
+  appendBot("Hey, I'm here whenever you want to dive in again.");
   chatInput.focus();
 }
 
@@ -106,4 +130,23 @@ function openHelp() {
 function closeHelp() {
   helpModal.classList.remove('open');
   helpModal.setAttribute('aria-hidden', 'true');
+}
+
+function showBotTyping() {
+  const div = document.createElement('div');
+  div.className = 'bubble bot typing';
+
+  const dots = document.createElement('div');
+  dots.className = 'typing-dots';
+  dots.innerHTML = '<span></span><span></span><span></span>';
+
+  div.appendChild(dots);
+  chatLog.appendChild(div);
+  chatLog.scrollTop = chatLog.scrollHeight;
+
+  return () => {
+    if (div.parentNode) {
+      div.parentNode.removeChild(div);
+    }
+  };
 }

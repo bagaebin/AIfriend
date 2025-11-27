@@ -33,9 +33,12 @@
         </section>
 
         <section class="call-shell" aria-label="call preview">
-          <div class="portrait" role="img" aria-label="generated portrait">
-            <img id="portrait-image" src="/avatars/default.svg" alt="User portrait" />
-            <span class="chip chip--tag">You</span>
+          <div id="portrait" class="portrait" role="img" aria-label="generated portrait">
+            <img id="portrait-image" alt="User portrait" hidden />
+            <div class="portrait-fallback" aria-label="Waiting for portrait">
+              <div class="bot-avatar" aria-hidden="true"></div>
+              <div class="bot-label">Bot</div>
+            </div>
           </div>
 
           <div class="call-controls">

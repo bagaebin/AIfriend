@@ -17,7 +17,7 @@
   - Terminate TLS so the browser can access camera APIs over HTTPS.
   - Forward `/<assets>` and `/api/*` to the Node backend (default upstream `http://127.0.0.1:3000`).
   - Set `ALLOWED_ORIGIN=https://yourdomain.com` to lock down CORS in production.
-- If serving from a subpath, keep the reverse proxy rewriting to `/` so the relative asset paths (e.g., `/avatars/default.svg`, `/api/chat-avatar`) remain valid.
+- If serving from a subpath, keep the reverse proxy rewriting to `/` so the relative asset paths (e.g., `/avatars/<generated>.png`, `/api/chat-avatar`) remain valid.
 
 ## Troubleshooting "no AI response"
 - Hit `GET /api/health`; if `openai` is `false`, the backend is in stub mode (no key or key not loaded). Ensure `.env` is in the same directory as `server.js` and restart the server.
